@@ -12,380 +12,138 @@
       theme: {
         extend: {
           fontFamily: { sans: ["Inter","ui-sans-serif","system-ui","Segoe UI","Roboto"] },
-          colors: { brand: { 50:'#eef2ff', 200:'#c7d2fe', 500:'#6366f1' }, win: '#22c55e', rent: '#0ea5e9' },
-          boxShadow: { soft: "0 8px 30px rgba(2,6,23,.35)" }
+          colors: { brand: { 500:'#6366f1' }, win:'#22c55e', rent:'#0ea5e9' }
         }
       }
     }
   </script>
-
-  <!-- Inter font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
-    body{
-      background:
-        radial-gradient(1000px 700px at 20% 10%, #0ea5e9 10%, transparent 60%),
-        radial-gradient(1200px 800px at 80% 0%, #8b5cf6 10%, transparent 60%),
-        linear-gradient(180deg, #0b1020, #0b1020 30%, #0f172a 100%);
-      color:#e5e7eb; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-    }
-    .card{ border-radius:1rem; background: rgba(15,23,42,.72); backdrop-filter: blur(6px); box-shadow: var(--tw-shadow,0 8px 30px rgba(2,6,23,.35)); border:1px solid rgba(148,163,184,.18); }
-    .label{ font-size:.95rem; color:#e2e8f0; line-height:1.35 }
-    .input{ width:100%; border-radius:.75rem; border:1px solid rgba(148,163,184,.35); padding:.7rem .9rem; outline:none; background: rgba(2,6,23,.65); color:#f8fafc }
-    .input::placeholder{ color:#94a3b8; opacity:.9 }
-    .input:focus{ box-shadow:0 0 0 2px #6366f14d; border-color:#6366f1 }
-    .btn{ display:inline-flex; align-items:center; gap:.6rem; border-radius:.9rem; padding:.7rem 1rem; font-weight:700; color:#0b1020; background:#f8fafc }
-    .kpi{ font-size: clamp(1.5rem, 3.2vw, 2.4rem); font-weight:900; letter-spacing:-.01em }
-    .sub{ color:#c7cbd6; font-size:1rem }
-    .sub-quiet{ color:#94a3b8; font-size:.9rem }
-    .pill{ display:inline-flex; align-items:center; gap:.5rem; border-radius:9999px; padding:.35rem .8rem; background:#0ea5e9; color:#001018; font-weight:800 }
-    .pill.win{ background:#22c55e; color:#00140a }
-    .bar-bg{ height:.75rem; border-radius:9999px; background:rgba(148,163,184,.25) }
-    .bar-fill{ height:100%; border-radius:9999px }
-    /* Remove spinner arrows on number inputs */
-    .no-spin::-webkit-outer-spin-button, .no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .no-spin[type=number] { -moz-appearance: textfield; }
-    /* Help button + popover */
-    .help-btn{ display:inline-flex; align-items:center; justify-content:center; width:1.25rem; height:1.25rem; border-radius:9999px; font-weight:800; background:#1f2937; color:#e5e7eb; border:1px solid rgba(148,163,184,.4) }
-    .help-pop{ position:fixed; z-index:50; max-width:22rem; padding:.6rem .75rem; border-radius:.6rem; background:#0b1224; color:#e5e7eb; border:1px solid rgba(148,163,184,.25); box-shadow:0 10px 30px rgba(2,6,23,.45); font-size:.9rem; line-height:1.3 }
-    .help-pop::after{ content:\"\"; position:absolute; width:10px; height:10px; background:#0b1224; border-left:1px solid rgba(148,163,184,.25); border-top:1px solid rgba(148,163,184,.25); transform:rotate(45deg); top:-6px; left:12px }
+    body{ background:linear-gradient(180deg,#0b1020,#0f172a); color:#e5e7eb; }
+    .card{ border-radius:1rem; background:rgba(15,23,42,.72); padding:1.5rem; margin-bottom:1rem; }
+    .label{ font-size:.95rem; color:#e2e8f0; display:block; margin-top:.5rem; }
+    .input{ width:100%; border-radius:.75rem; border:1px solid rgba(148,163,184,.35); padding:.6rem; background:rgba(2,6,23,.65); color:#f8fafc; }
+    .btn{ padding:.6rem 1rem; border-radius:.75rem; font-weight:700; background:#f8fafc; color:#111; margin-right:.5rem; }
+    .kpi{ font-size:1.8rem; font-weight:800; }
+    .pill{ display:inline-block; padding:.3rem .8rem; border-radius:9999px; font-weight:700; background:#0ea5e9; color:#001018; }
+    .pill.win{ background:#22c55e; color:#00140a; }
+    details{ margin-top:1rem; }
+    details pre{ background:rgba(0,0,0,.3); padding:1rem; border-radius:.5rem; font-size:.85rem; white-space:pre-wrap; }
   </style>
 </head>
-<body class="min-h-screen font-sans">
-  <div class="max-w-6xl mx-auto p-6 md:p-10 space-y-8">
-
-    <!-- Header -->
-    <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
+<body class="font-sans">
+  <div class="max-w-5xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-extrabold">Buy vs Rent</h1>
       <div>
-        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Buy vs Rent</h1>
-        <p class="sub text-slate-100 mt-1">Enter your numbers and click <span class="font-semibold text-brand-200">Run</span>. We’ll clearly show which option leaves you with more money—and by how much.</p>
-      </div>
-      <div class="flex gap-3 flex-wrap">
-        <button id="btnRun" class="btn" type="button">Run</button>
-        <button id="btnReset" class="btn" type="button" title="Reset to defaults">Reset</button>
+        <button id="btnRun" class="btn">Run</button>
+        <button id="btnReset" class="btn">Reset</button>
       </div>
     </header>
 
-    <!-- Inputs -->
-    <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      <!-- Property -->
-      <div class="card p-6 space-y-4">
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="card">
         <h3 class="text-lg font-semibold">Property</h3>
-
-        <div class="flex items-center justify-between gap-2">
-          <label class="label" for="propVal">Property Value (₹)</label>
-          <button type="button" class="help-btn" data-help="Market price of the home you intend to buy.">?</button>
-        </div>
-        <input id="propVal" class="input no-spin" type="number" min="0" step="10000" value="15000000" placeholder="e.g., 1,50,00,000" />
-
-        <div class="flex items-center justify-between gap-2">
-          <label class="label" for="downPayment">Available Cash for Down Payment (₹)</label>
-          <button type="button" class="help-btn" data-help="Cash you can commit upfront; reduces your loan amount.">?</button>
-        </div>
-        <input id="downPayment" class="input no-spin" type="number" min="0" step="10000" value="5000000" placeholder="e.g., sale proceeds / savings" />
-        <p class="sub-quiet">If cash ≥ property value, the loan becomes ₹0 automatically.</p>
-
-        <div class="flex items-center justify-between gap-2">
-          <label class="label" for="stampRate">Stamp Duty + Registration (%)</label>
-          <button type="button" class="help-btn" data-help="Upfront government charges as a % of property value.">?</button>
-        </div>
-        <input id="stampRate" class="input no-spin" type="number" min="0" max="15" step="0.01" value="11" />
-
-        <div class="grid grid-cols-2 gap-3">
-          <div class="space-y-2">
-            <div class="flex items-center justify-between gap-2">
-              <label class="label" for="stayYears">Stay Duration (years)</label>
-              <button type="button" class="help-btn" data-help="How long you expect to live in this home before selling or moving.">?</button>
-            </div>
-            <input id="stayYears" class="input no-spin" type="number" min="1" max="50" step="1" value="10" />
-          </div>
-          <div class="space-y-2">
-            <div class="flex items-center justify-between gap-2">
-              <label class="label" for="propApp">Property Appreciation (annual, %)</label>
-              <button type="button" class="help-btn" data-help="Expected annualized growth rate of the property's value.">?</button>
-            </div>
-            <input id="propApp" class="input no-spin" type="number" min="-50" max="50" step="0.01" value="5" />
-          </div>
-        </div>
+        <label class="label">Property Value (₹)</label>
+        <input id="propVal" class="input" type="number" value="15000000">
+        <label class="label">Down Payment (₹)</label>
+        <input id="downPayment" class="input" type="number" value="5000000">
+        <label class="label">Stamp Duty (%)</label>
+        <input id="stampRate" class="input" type="number" value="11">
+        <label class="label">Stay Duration (years)</label>
+        <input id="stayYears" class="input" type="number" value="10">
+        <label class="label">Property Appreciation (%)</label>
+        <input id="propApp" class="input" type="number" value="5">
       </div>
 
-      <!-- Loan -->
-      <div class="card p-6 space-y-4">
+      <div class="card">
         <h3 class="text-lg font-semibold">Loan</h3>
-
-        <div class="flex items-center justify-between gap-2">
-          <label class="label" for="loanRate">Home Loan Interest (annual, %)</label>
-          <button type="button" class="help-btn" data-help="Your lender's annual interest rate for the home loan.">?</button>
-        </div>
-        <input id="loanRate" class="input no-spin" type="number" min="0" max="30" step="0.01" value="8" />
-
-        <div class="flex items-center justify-between gap-2">
-          <label class="label" for="loanTenure">Loan Tenure (years)</label>
-          <button type="button" class="help-btn" data-help="Total repayment period of the home loan.">?</button>
-        </div>
-        <input id="loanTenure" class="input no-spin" type="number" min="1" max="40" step="1" value="20" />
-
-        <p class="sub-quiet">EMI is computed using a standard amortization formula. Prepayments aren’t modeled.</p>
+        <label class="label">Loan Interest (%)</label>
+        <input id="loanRate" class="input" type="number" value="8">
+        <label class="label">Loan Tenure (years)</label>
+        <input id="loanTenure" class="input" type="number" value="20">
       </div>
 
-      <!-- Rent & Investments -->
-      <div class="card p-6 space-y-4">
+      <div class="card">
         <h3 class="text-lg font-semibold">Rent & Investments</h3>
-
-        <div class="flex items-center justify-between gap-2">
-          <label class="label" for="rent0">Initial Monthly Rent (₹)</label>
-          <button type="button" class="help-btn" data-help="Current rent you would pay for a comparable home.">?</button>
-        </div>
-        <input id="rent0" class="input no-spin" type="number" min="0" step="1000" value="40000" />
-
-        <div class="grid grid-cols-2 gap-3">
-          <div class="space-y-2">
-            <div class="flex items-center justify-between gap-2">
-              <label class="label" for="maint0">Maintenance (₹/mo)</label>
-              <button type="button" class="help-btn" data-help="Monthly society/HOA charges. Assumed same for owner and tenant.">?</button>
-            </div>
-            <input id="maint0" class="input no-spin" type="number" min="0" step="500" value="5000" />
-          </div>
-          <div class="space-y-2">
-            <div class="flex items-center justify-between gap-2">
-              <label class="label" for="incRate">Rent Increase per Step (%)</label>
-              <button type="button" class="help-btn" data-help="How much rent jumps at each increase (e.g., 10%).">?</button>
-            </div>
-            <input id="incRate" class="input no-spin" type="number" min="0" max="30" step="0.01" value="10" />
-          </div>
-        </div>
-
-        <div class="space-y-2">
-          <div class="flex items-center justify-between gap-2">
-            <label class="label" for="incInterval">Increase Interval (months)</label>
-            <button type="button" class="help-btn" data-help="How often rent increases (e.g., every 11–24 months).">?</button>
-          </div>
-          <input id="incInterval" class="input no-spin" type="number" min="1" max="36" step="1" value="24" />
-        </div>
-
-        <div class="flex items-center gap-2 mt-2">
-          <input id="includeStampInMF" type="checkbox" class="h-4 w-4" checked />
-          <span class="label">Invest stamp duty if renting</span>
-          <button type="button" class="help-btn" data-help="If you rent, assume the avoided stamp/registration cost is invested on day 1.">?</button>
-        </div>
-
-        <div class="flex items-center justify-between gap-2">
-          <label class="label" for="mfRate">MF Return (annual, %)</label>
-          <button type="button" class="help-btn" data-help="Expected annualized return of your mutual fund/SIP investments.">?</button>
-        </div>
-        <input id="mfRate" class="input no-spin" type="number" min="-50" max="50" step="0.01" value="12" />
-
-        <p class="sub-quiet">Surplus each month on rent path is SIP’ed. No tax modeling for simplicity.</p>
+        <label class="label">Initial Rent (₹)</label>
+        <input id="rent0" class="input" type="number" value="40000">
+        <label class="label">Maintenance (₹/mo)</label>
+        <input id="maint0" class="input" type="number" value="5000">
+        <label class="label">Increase Interval (months)</label>
+        <input id="incInterval" class="input" type="number" value="24">
+        <label class="label">Increase per Step (%)</label>
+        <input id="incRate" class="input" type="number" value="10">
+        <label class="label">MF Return (%)</label>
+        <input id="mfRate" class="input" type="number" value="12">
+        <label class="flex items-center mt-2"><input id="includeStampInMF" type="checkbox" checked class="mr-2"> Invest Stamp Duty if renting</label>
       </div>
     </section>
 
-    <!-- Results -->
-    <section class="card p-6 space-y-4">
+    <section class="card mt-6">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-semibold">Results</h3>
         <span id="winnerBadge" class="pill">—</span>
       </div>
-
-      <!-- Winner delta bar -->
-      <div class="space-y-2">
-        <div class="bar-bg"><div id="deltaBar" class="bar-fill" style="width:0%"></div></div>
-        <div class="text-sm text-slate-300" id="deltaText">—</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div><div class="sub">BUY</div><div id="kpiBuy" class="kpi">—</div><div id="buyNotes" class="text-sm">—</div></div>
+        <div><div class="sub">RENT</div><div id="kpiRent" class="kpi">—</div><div id="rentNotes" class="text-sm">—</div></div>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-        <div class="p-4 rounded-xl bg-black/30 border border-white/10">
-          <div class="sub-quiet">BUY (Property FV − Loan Outstanding)</div>
-          <div id="kpiBuy" class="kpi mt-1">—</div>
-          <div class="mt-2 text-sm text-slate-300" id="buyNotes">—</div>
-        </div>
-        <div class="p-4 rounded-xl bg-black/30 border border-white/10">
-          <div class="sub-quiet">RENT (MF Value)</div>
-          <div id="kpiRent" class="kpi mt-1">—</div>
-          <div class="mt-2 text-sm text-slate-300" id="rentNotes">—</div>
-        </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <div>Total Rent+Maint: <span id="kpiRentTotal" class="font-bold">—</span></div>
+        <div>Total EMI+Maint: <span id="kpiBuyTotal" class="font-bold">—</span></div>
+        <div>Stamp Duty: <span id="kpiStamp" class="font-bold">—</span></div>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-        <div class="p-4 rounded-xl bg-black/20 border border-white/10"><div class="sub-quiet">Total Rent + Maint</div><div id="kpiRentTotal" class="kpi mt-1">—</div></div>
-        <div class="p-4 rounded-xl bg-black/20 border border-white/10"><div class="sub-quiet">Total EMI + Owner Maint</div><div id="kpiBuyTotal" class="kpi mt-1">—</div></div>
-        <div class="p-4 rounded-xl bg-black/20 border border-white/10"><div class="sub-quiet">Upfront Stamp Duty</div><div id="kpiStamp" class="kpi mt-1">—</div></div>
-      </div>
+      <details>
+        <summary class="cursor-pointer text-brand-500 font-semibold">Show calculations</summary>
+        <pre id="calcText">—</pre>
+      </details>
     </section>
 
-    <footer class="text-center text-xs text-slate-300 pb-10">© Buy vs Rent • Planning only; not advice.</footer>
+    <footer class="text-center text-xs text-slate-300 mt-6">© Buy vs Rent • Planning only; not advice.</footer>
   </div>
 
-  <div id="helpMount" aria-live="polite" aria-atomic="true"></div>
   <script>
-    // ---------- Utilities ----------
-    const $ = (id)=> document.getElementById(id);
-    const fmt = (n)=> (n==null || isNaN(n)) ? '—' : new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(n);
-    const clamp = (v, lo, hi)=> Math.max(lo, Math.min(hi, v));
+    const $ = id => document.getElementById(id);
+    const fmt = n => (isNaN(n)?'—': new Intl.NumberFormat('en-IN').format(Math.round(n)) );
+    function pmt(r,n,pv){ if(r===0) return pv/n; const f=Math.pow(1+r,n); return (pv*r*f)/(f-1); }
+    function pvExcel(r,n,pmt,fv=0){ if(r===0) return -(fv+pmt*n); return -(pmt*(1-Math.pow(1+r,-n))/r + fv*Math.pow(1+r,-n)); }
+    function loanOutstanding(r,n,pmt,k){ return -pvExcel(r, n-k, pmt, 0); }
+    function seriesWithStep(initial, months, stepM, stepR){ let out=[]; for(let m=1;m<=months;m++){ let steps=Math.floor((m-1)/stepM); out.push(initial*Math.pow(1+stepR, steps)); } return out; }
 
-    function pmt(r, n, pv){ if(r===0) return n? pv/n : 0; const f=Math.pow(1+r,n); return (pv*r*f)/(f-1); }
-    function pvExcel(r,n,pmtVal,fv=0){ if(r===0) return -(fv+pmtVal*n); return -( pmtVal*(1-Math.pow(1+r,-n))/r + fv*Math.pow(1+r,-n) ); }
-    function loanOutstanding(r,n,pmtVal,k){ const remain = Math.max(0, n-k); return -pvExcel(r, remain, pmtVal, 0); }
-    function seriesWithStep(initial, months, stepM, stepR){ const out=[]; const safeStepM = stepM>0 ? stepM : months+1; for(let m=1;m<=months;m++){ const steps=Math.floor((m-1)/safeStepM); out.push(initial*Math.pow(1+stepR, steps)); } return out; }
+    function pullInputs(){ const gv=id=>+$(id).value||0; return {
+      propVal:gv('propVal'), downPayment:gv('downPayment'), stampRate:gv('stampRate')/100, stayYears:gv('stayYears'), propApp:gv('propApp')/100,
+      loanRateAnnual:gv('loanRate')/100, loanTenureYears:gv('loanTenure'),
+      rent0:gv('rent0'), maint0:gv('maint0'), incInterval:gv('incInterval'), incRate:gv('incRate')/100,
+      mfRateAnnual:gv('mfRate')/100, includeStampInMF:$('includeStampInMF').checked
+    };}
 
-    // ---------- Inputs ----------
-    function pullInputs(){
-      const gv = id => +($(id).value||0);
-      return {
-        propVal: Math.max(0, gv('propVal')),
-        downPayment: Math.max(0, gv('downPayment')),
-        stayYears: clamp(gv('stayYears'), 1, 50) || 10,
-        propApp: (clamp(gv('propApp'), -50, 50))/100,
-        stampRate: (clamp(gv('stampRate'), 0, 15))/100,
-        loanRateAnnual: (clamp(gv('loanRate'), 0, 30))/100,
-        loanTenureYears: clamp(gv('loanTenure'), 1, 40) || 20,
-        rent0: Math.max(0, gv('rent0')),
-        maint0: Math.max(0, gv('maint0')),
-        incRate: (clamp(gv('incRate'), 0, 30))/100,
-        incInterval: Math.max(1, Math.floor(gv('incInterval')||24)),
-        includeStampInMF: $('includeStampInMF')?.checked ?? true,
-        mfRateAnnual: (clamp(gv('mfRate'), -50, 50))/100,
-      };
-    }
-
-    // ---------- Core Model ----------
     function computeScenario(inp){
-      const monthsFull = Math.max(0, Math.round(inp.stayYears*12));
-      const rM = inp.loanRateAnnual/12; // monthly loan rate
-      const mfM = Math.pow(1+inp.mfRateAnnual,1/12) - 1; // monthly MF rate
+      const months=inp.stayYears*12, rM=inp.loanRateAnnual/12, mfM=Math.pow(1+inp.mfRateAnnual,1/12)-1;
+      const loanAmt=Math.max(0,inp.propVal-inp.downPayment), nTotal=inp.loanTenureYears*12;
+      const emi=loanAmt>0? pmt(rM,nTotal,loanAmt):0, stampAmt=inp.propVal*inp.stampRate;
+      const rents=seriesWithStep(inp.rent0,months,inp.incInterval,inp.incRate);
+      const maints=seriesWithStep(inp.maint0,months,inp.incInterval,inp.incRate);
+      let mf=inp.downPayment+(inp.includeStampInMF? stampAmt:0), totalRent=0,totalOwn=0;
+      for(let i=0;i<months;i++){ let rent=rents[i],maint=maints[i]; totalRent+=rent+maint; totalOwn+=emi+maint; let surplus=Math.max(emi+maint-(rent+maint),0); mf=mf*(1+mfM)+surplus; }
+      const fv=inp.propVal*Math.pow(1+inp.propApp,inp.stayYears), outEnd=loanOutstanding(rM,nTotal,emi,Math.min(months,nTotal));
+      return {endBuy:fv-outEnd,endRent:mf,totalRent,totalOwn,stampAmt,emi,loanAmt,fv,outEnd}; }
 
-      const loanAmt = Math.max(0, inp.propVal - inp.downPayment);
-      const nTotal = Math.floor(inp.loanTenureYears*12);
-      const emi = loanAmt>0 ? pmt(rM, nTotal, loanAmt) : 0;
-      const stampAmt = inp.propVal*inp.stampRate;
+    function render(a,inp){
+      $('kpiBuy').textContent='₹'+fmt(a.endBuy); $('kpiRent').textContent='₹'+fmt(a.endRent);
+      $('kpiRentTotal').textContent='₹'+fmt(a.totalRent); $('kpiBuyTotal').textContent='₹'+fmt(a.totalOwn); $('kpiStamp').textContent='₹'+fmt(a.stampAmt);
+      $('buyNotes').textContent=`Loan ₹${fmt(a.loanAmt)} | EMI ₹${fmt(a.emi)}/mo`; $('rentNotes').textContent=`Corpus starts ₹${fmt(inp.downPayment+(inp.includeStampInMF?a.stampAmt:0))}`;
+      const win=a.endBuy>a.endRent?'BUY':'RENT'; $('winnerBadge').textContent='Winner: '+win; $('winnerBadge').className='pill '+(win==='BUY'?'win':'');
+      let lines=[]; lines.push(`Loan amount: ₹${fmt(a.loanAmt)}; EMI: ₹${fmt(a.emi)}`); lines.push(`Property FV: ₹${fmt(a.fv)}; Outstanding: ₹${fmt(a.outEnd)}`);
+      lines.push(`Stamp Duty: ₹${fmt(a.stampAmt)}`); lines.push(`Totals → Rent: ₹${fmt(a.totalRent)}, Buy: ₹${fmt(a.totalOwn)}`); lines.push(`Results → Buy: ₹${fmt(a.endBuy)}, Rent: ₹${fmt(a.endRent)}`);
+      $('calcText').textContent=lines.join('\n'); }
 
-      const rents = seriesWithStep(inp.rent0, monthsFull, inp.incInterval, inp.incRate);
-      const maints = seriesWithStep(inp.maint0, monthsFull, inp.incInterval, inp.incRate);
-
-      let mf = inp.downPayment + (inp.includeStampInMF? stampAmt: 0); // initial corpus for Rent path
-      let totalRentEff=0, totalOwn=0;
-
-      for(let i=0;i<monthsFull;i++){
-        const rent = rents[i]||0; const maint = maints[i]||0;
-        const rentEff = rent + maint;      // tenant pays rent + maint
-        const ownerMaint = maint;          // owner also pays maint
-
-        // Loan dynamics
-        const outPrev = loanOutstanding(rM, nTotal, emi, i);
-        const interest = outPrev*rM;
-        const principal = Math.min(emi, Math.max(emi - interest, 0));
-        const ownTotal = (emi||0) + ownerMaint;
-
-        const surplus = Math.max(ownTotal - rentEff, 0); // what a renter can invest extra
-        mf = mf*(1+mfM) + surplus;
-
-        totalRentEff += rentEff; totalOwn += ownTotal;
-      }
-
-      const fvEnd = inp.propVal * Math.pow(1+inp.propApp, inp.stayYears);
-      const outEndFinal = loanOutstanding(rM, nTotal, emi, Math.min(monthsFull, nTotal));
-      const endBuy = fvEnd - outEndFinal;
-      const endRent = mf;
-
-      return { endBuy, endRent, totalRentEff, totalOwn, stampAmt, emi, loanAmt };
-    }
-
-    // ---------- Rendering ----------
-    function render(results, inp){
-      const { endBuy, endRent, totalRentEff, totalOwn, stampAmt, emi, loanAmt } = results;
-
-      // KPIs
-      $('kpiBuy').textContent = '₹' + fmt(endBuy);
-      $('kpiRent').textContent = '₹' + fmt(endRent);
-      $('kpiRentTotal').textContent = '₹' + fmt(totalRentEff);
-      $('kpiBuyTotal').textContent = '₹' + fmt(totalOwn);
-      $('kpiStamp').textContent = '₹' + fmt(stampAmt);
-
-      $('buyNotes').textContent = `Loan ₹${fmt(loanAmt)} | EMI ₹${fmt(emi)} / mo | Tenure ${inp.loanTenureYears}y`;
-      $('rentNotes').textContent = `SIPed surplus monthly + initial corpus ₹${fmt(inp.downPayment + (inp.includeStampInMF? stampAmt:0))}`;
-
-      // Winner badge + delta bar
-      const win = endBuy > endRent ? 'BUY' : 'RENT';
-      const deltaAbs = Math.abs(endBuy - endRent);
-      const deltaPct = ((deltaAbs / Math.max(endBuy, endRent)) || 0);
-      const badge = $('winnerBadge');
-      badge.textContent = `Winner: ${win}`;
-      badge.className = `pill ${win==='BUY' ? 'win' : ''}`;
-
-      const bar = $('deltaBar');
-      const barPct = Math.max(0, Math.min(100, deltaPct*100));
-      bar.style.width = barPct.toFixed(1) + '%';
-      bar.style.background = win==='BUY' ? 'var(--tw-gradient-from,#22c55e)' : 'var(--tw-gradient-from,#0ea5e9)';
-      $('deltaText').textContent = `${win} ahead by ₹${fmt(deltaAbs)} (~${(barPct).toFixed(1)} of the larger outcome)`;
-    }
-
-    // ---------- Help popovers (click, hover, focus) ----------
-    let activePop, hoverTimer;
-    function placeHelp(pop, btn){
-      const rect = btn.getBoundingClientRect();
-      document.body.appendChild(pop);
-      // default above button; flip below if not enough space
-      const aboveTop = window.scrollY + rect.top - pop.offsetHeight - 12;
-      const belowTop = window.scrollY + rect.bottom + 12;
-      const hasSpaceAbove = rect.top >= pop.offsetHeight + 20;
-      const top = hasSpaceAbove ? aboveTop : belowTop;
-      pop.style.top = Math.max(8, top) + 'px';
-      // keep within viewport horizontally
-      let left = window.scrollX + rect.left;
-      const maxLeft = window.scrollX + document.documentElement.clientWidth - pop.offsetWidth - 8;
-      pop.style.left = Math.max(8, Math.min(left, maxLeft)) + 'px';
-      if(!hasSpaceAbove){ pop.style.setProperty('--arrow-dir','down'); pop.style.transformOrigin = 'top left'; }
-    }
-    function showHelp(btn){
-      hideHelp();
-      const pop = document.createElement('div');
-      pop.className='help-pop';
-      pop.setAttribute('role','tooltip');
-      pop.textContent = btn.getAttribute('data-help')||'';
-      placeHelp(pop, btn);
-      activePop = pop;
-    }
-    function hideHelp(){ if(activePop){ activePop.remove(); activePop=null; } }
-    function bindHelp(el){
-      el.addEventListener('click', (e)=>{ e.preventDefault(); showHelp(el); });
-      el.addEventListener('mouseenter', ()=>{ clearTimeout(hoverTimer); showHelp(el); });
-      el.addEventListener('mouseleave', ()=>{ hoverTimer = setTimeout(hideHelp, 150); });
-      el.addEventListener('focus', ()=> showHelp(el));
-      el.addEventListener('blur', hideHelp);
-    }
-
-    // ---------- Controls ----------
-    function run(){ const inp = pullInputs(); const res = computeScenario(inp); render(res, inp); }
-
-    function reset(){
-      const defaults = {
-        propVal:15000000, downPayment:5000000, stayYears:10, propApp:5, stampRate:11,
-        loanRate:8, loanTenure:20, rent0:40000, maint0:5000, incRate:10, incInterval:24,
-        includeStampInMF:true, mfRate:12
-      };
-      for(const [k,v] of Object.entries(defaults)){
-        const el = $(k);
-        if(!el) continue;
-        if(el.type==='checkbox'){ el.checked = !!v; } else { el.value = v; }
-      }
-      run();
-    }
-
-    // ---------- Init ----------
-    window.addEventListener('DOMContentLoaded', ()=>{
-      $('btnRun').onclick = run;
-      $('btnReset').onclick = reset;
-      document.querySelectorAll('.help-btn').forEach(bindHelp);
-      document.addEventListener('click', (e)=>{
-        // click outside closes
-        if(activePop && !e.target.closest('.help-pop') && !e.target.closest('.help-btn')) hideHelp();
-      });
-      window.addEventListener('resize', hideHelp);
-      window.addEventListener('scroll', ()=>{ if(activePop) hideHelp(); }, { passive:true });
-      run();
-    });
+    function run(){ const inp=pullInputs(); const a=computeScenario(inp); render(a,inp); }
+    function reset(){ ['propVal','downPayment','stampRate','stayYears','propApp','loanRate','loanTenure','rent0','maint0','incInterval','incRate','mfRate'].forEach(id=>{ $(id).value=$(id).defaultValue; }); $('includeStampInMF').checked=true; run(); }
+    window.onload=()=>{ $('btnRun').onclick=run; $('btnReset').onclick=reset; run(); };
   </script>
 </body>
 </html>
