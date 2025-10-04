@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Buy vs Rent Calculator (India)</title>
+  <!-- TailwindCSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js (for quick visuals) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    /* Fallback fonts */
+    html { scroll-behavior: smooth; }
+    .card { @apply rounded-2xl shadow-md bg-white; }
+    .card-header { @apply text-lg font-semibold mb-2; }
+    .input { @apply w-full rounded-xl border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500; }
+    .label { @apply text-sm text-slate-600; }
+    .pill { @apply inline-flex items-center gap-2 rounded-full px-3 py-1 bg-slate-100 text-slate-700 text-xs font-medium; }
+    .grid2 { @apply grid grid-cols-1 md:grid-cols-2 gap-4; }
+    .grid3 { @apply grid grid-cols-1 md:grid-cols-3 gap-4; }
+    .muted { @apply text-slate-500; }
+    .btn { @apply rounded-xl px-4 py-2 font-semibold shadow-sm bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[.99]; }
+    .btn-ghost { @apply rounded-xl px-4 py-2 font-semibold bg-slate-100 text-slate-800 hover:bg-slate-200; }
+    .table { @apply min-w-full text-sm; }
+    .table th { @apply text-left font-semibold text-slate-600; }
+    .kpi { @apply text-2xl font-bold; }
+    .kpi-badge { @apply text-xs font-semibold px-2 py-0.5 rounded-md; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+    <header class="flex items-start md:items-center justify-between gap-4 flex-col md:flex-row">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold">Buy vs Rent – 10‑Year Decision Helper</h1>
+        <p class="muted">Optimised for Indian context • EMI vs Rent • Compounding surplus at chosen MF return • Step increases for rent & maintenance</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="btnRun" class="btn">Run Analysis</button>
+        <button id="btnCSV" class="btn-ghost">Download Monthly CSV</button>
+      </div>
+    </header>
+
+    <!-- Inputs -->
+    <section class="card p-4 md:p-6">
+      <h2 class="card-header">Inputs</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="space-y-4">
+          <div>
+            <label class="label">Property Value (₹)</label>
+            <input id="propVal" type="number" class="input" value="15000000" />
+          </div>
+          <div>
+            <label class="label">Sale Proceeds of Current Flat (₹)</label>
+            <input id="saleAmt" type="number" class="input" value="5000000" />
+          </div>
+          <div>
+            <label class="label">Down Payment used if Buying (₹)</label>
+            <input id="downPayment" type="number" class="input" value="5000000" />
+          </div>
+          <div>
+            <label class="label">Stamp Duty + Registration (%)</label>
+            <input id="stampRate" type="number" step="0.01" class="input" value="11" />
+          </div>
+          <div>
+            <label class="label">Stay Duration (years)</label>
+            <input id="stayYears" type="number" class="input" value="10" />
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="label">Home Loan Interest (annual, %)</label>
+            <input id="loanRate" type="number" step="0.01" class="input" value="8" />
+          </div>
+          <div>
+            <label class="label">Loan Tenure (years)</label>
+            <input id="loanTenure" type="number" class="input" value="20" />
+          </div>
+          <div>
+            <label class="label">Loan Amount (₹)</label>
+            <input id="loanAmount" type="number" class="input" value="10000000" />
+          </div>
+          <div>
+            <label class="label">Property Appreciation (annual, %)</label>
+            <input id="propApp" type="number" step="0.01" class="input" value="5" />
+          </div>
+          <div class="flex items-center gap-2">
+            <input id="includeStampInMF" type="checkbox" class="h-4 w-4" checked />
+            <label for="includeStampInMF" class="label">Rent path invests <b>avoided</b> stamp duty upfront</label>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="label">Initial Monthly Rent (₹)</label>
+            <input id="rent0" type="number" class="input" value="40000" />
+          </div>
+          <div>
+            <label class="label">Initial Monthly Maintenance (₹)</label>
+            <input id="maint0" type="number" class="input" value="5000" />
+          </div>
+          <div>
+            <label class="label">Increase Interval (months)</label>
+            <input id="incInterval" type="number" class="input" value="24" />
+          </div>
+          <div>
+            <label class="label">Increase Rate per Step (%)</label>
+            <input id="incRate" type="number" step="0.01" class="input" value="10" />
+          </div>
+          <div>
+            <label class="label">MF Return (annual, %)</label>
+            <input id="mfRate" type="number" step="0.01" class="input" value="12" />
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 text-xs text-slate-500">Assumptions: surplus each month = max((EMI+owner maintenance) − (rent+tenant maintenance), 0). Surplus is invested at the MF rate. Loan outstanding is computed with Excel‑style PV/PMT identities.</div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="grid2">
+      <div class="card p-4 md:p-6 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="card-header">Ending Wealth</h3>
+          <span id="winnerBadge" class="pill">—</span>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <div class="muted">BUY (Property FV − Loan Outstanding)</div>
+            <div id="kpiBuy" class="kpi">—</div>
+          </div>
+          <div>
+            <div class="muted">RENT (MF Value)</div>
+            <div id="kpiRent" class="kpi">—</div>
+          </div>
+        </div>
+        <canvas id="endingChart" height="120"></canvas>
+      </div>
+      <div class="card p-4 md:p-6 space-y-3">
+        <h3 class="card-header">Totals (over stay)</h3>
+        <div class="grid3">
+          <div>
+            <div class="muted">Total Rent + Maint</div>
+            <div id="kpiRentTotal" class="kpi">—</div>
+          </div>
+          <div>
+            <div class="muted">Total EMI + Owner Maint</div>
+            <div id="kpiBuyTotal" class="kpi">—</div>
+          </div>
+          <div>
+            <div class="muted">Upfront Stamp Duty</div>
+            <div id="kpiStamp" class="kpi">—</div>
+          </div>
+        </div>
+        <div class="text-xs text-slate-500">Note: Upfront stamp duty is not directly added to "Ending Wealth – Buy"; its effect is embedded because equity = Property FV − Outstanding.</div>
+      </div>
+    </section>
+
+    <!-- Monthly Table -->
+    <section class="card p-4 md:p-6">
+      <div class="flex items-center justify-between">
+        <h2 class="card-header">Monthly Schedule (first 120 months)</h2>
+        <div class="pill"><span id="rowCount">0</span> rows</div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="table" id="monthlyTable">
+          <thead>
+            <tr class="border-b">
+              <th class="py-2">Month</th>
+              <th>Rent (₹)</th>
+              <th>Maint (₹)</th>
+              <th>Rent + Maint</th>
+              <th>EMI</th>
+              <th>Owner Maint</th>
+              <th>EMI + Owner Maint</th>
+              <th>Surplus if Renting</th>
+              <th>MF Value</th>
+              <th>Loan Outstanding</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ---------- Helpers ----------
+    const fmt = (n) => n === null || isNaN(n) ? '—' : new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(n);
+
+    function pmt(rate, nper, pv) {
+      // Excel PMT(rate, nper, -pv)
+      if (rate === 0) return pv / nper;
+      const r = rate;
+      return (pv * r * Math.pow(1 + r, nper)) / (Math.pow(1 + r, nper) - 1);
+    }
+
+    function loanOutstanding(rate, nper, pmtVal, k) {
+      // Remaining balance after k payments: -PV(r, nper-k, pmt, 0)
+      const pv = -pvExcel(rate, nper - k, pmtVal, 0);
+      return pv;
+    }
+
+    function pvExcel(rate, nper, pmtVal, fv = 0) {
+      if (rate === 0) return -(fv + pmtVal * nper);
+      const r = rate;
+      return - ( pmtVal * (1 - Math.pow(1 + r, -nper)) / r + fv * Math.pow(1 + r, -nper) );
+    }
+
+    function seriesWithStep(initial, months, stepMonths, stepRate) {
+      const out = [];
+      for (let m = 1; m <= months; m++) {
+        const steps = Math.floor((m - 1) / stepMonths);
+        out.push(initial * Math.pow(1 + stepRate, steps));
+      }
+      return out;
+    }
+
+    function toCSV(rows) {
+      const header = ["Month","Rent","Maint","Rent+Maint","EMI","OwnerMaint","EMI+OwnerMaint","SurplusIfRenting","MFValue","LoanOutstanding"];
+      const lines = [header.join(",")];
+      rows.forEach(r => lines.push(r.map(v => typeof v === 'number' ? Math.round(v) : v).join(",")));
+      return lines.join("\n");
+    }
+
+    // ---------- Main compute ----------
+    let chart;
+    function run() {
+      const propVal = +document.getElementById('propVal').value || 0;
+      const saleAmt = +document.getElementById('saleAmt').value || 0;
+      const downPayment = +document.getElementById('downPayment').value || 0;
+      const stampRate = (+document.getElementById('stampRate').value || 0) / 100;
+      const stayYears = +document.getElementById('stayYears').value || 0;
+
+      const loanRateAnnual = (+document.getElementById('loanRate').value || 0) / 100;
+      const loanTenureYears = +document.getElementById('loanTenure').value || 0;
+      const loanAmount = +document.getElementById('loanAmount').value || 0;
+      const propApp = (+document.getElementById('propApp').value || 0) / 100;
+
+      const rent0 = +document.getElementById('rent0').value || 0;
+      const maint0 = +document.getElementById('maint0').value || 0;
+      const incInterval = +document.getElementById('incInterval').value || 24;
+      const incRate = (+document.getElementById('incRate').value || 0) / 100;
+      const mfRateAnnual = (+document.getElementById('mfRate').value || 0) / 100;
+      const includeStampInMF = document.getElementById('includeStampInMF').checked;
+
+      const months = Math.min(stayYears * 12, 120); // show up to 10y table
+      const rMonthly = loanRateAnnual / 12;
+      const mfMonthly = Math.pow(1 + mfRateAnnual, 1/12) - 1;
+
+      const emi = pmt(rMonthly, loanTenureYears * 12, loanAmount);
+      const stampAmt = propVal * stampRate;
+
+      const rents = seriesWithStep(rent0, months, incInterval, incRate);
+      const maints = seriesWithStep(maint0, months, incInterval, incRate);
+
+      let mf = saleAmt + (includeStampInMF ? stampAmt : 0); // initial lump sum when renting
+      let totalRentMaint = 0;
+      let totalBuyMaintEmi = 0;
+
+      const rows = [];
+
+      for (let i = 0; i < months; i++) {
+        const month = i + 1;
+        const rent = rents[i];
+        const maint = maints[i];
+        const rentPlus = rent + maint;
+        const ownerMaint = maint; // same schedule when owning
+        const buyPlus = emi + ownerMaint;
+        const surplus = Math.max(buyPlus - rentPlus, 0); // invested if renting
+
+        // Compound MF, then add monthly surplus
+        mf = mf * (1 + mfMonthly) + surplus;
+
+        const outstanding = loanOutstanding(rMonthly, loanTenureYears * 12, emi, month);
+
+        totalRentMaint += rentPlus;
+        totalBuyMaintEmi += buyPlus;
+
+        rows.push([month, rent, maint, rentPlus, emi, ownerMaint, buyPlus, surplus, mf, outstanding]);
+      }
+
+      const propertyFV = propVal * Math.pow(1 + propApp, stayYears);
+      const outstandingEnd = rows.length ? rows[rows.length - 1][9] : 0;
+
+      const endingBuy = propertyFV - outstandingEnd; // equity
+      const endingRent = rows.length ? rows[rows.length - 1][8] : 0; // MF value
+
+      // Render KPIs
+      document.getElementById('kpiBuy').textContent = `₹${fmt(endingBuy)}`;
+      document.getElementById('kpiRent').textContent = `₹${fmt(endingRent)}`;
+      document.getElementById('kpiRentTotal').textContent = `₹${fmt(totalRentMaint)}`;
+      document.getElementById('kpiBuyTotal').textContent = `₹${fmt(totalBuyMaintEmi)}`;
+      document.getElementById('kpiStamp').textContent = `₹${fmt(stampAmt)}`;
+
+      const winner = endingBuy > endingRent ? 'BUY' : 'RENT';
+      const badge = document.getElementById('winnerBadge');
+      badge.textContent = `Winner: ${winner}`;
+      badge.className = `pill ${winner === 'BUY' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}`;
+
+      // Chart
+      const ctx = document.getElementById('endingChart');
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Buy (Equity)', 'Rent (MF Value)'],
+          datasets: [{
+            label: 'Ending Wealth',
+            data: [endingBuy, endingRent],
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { ticks: { callback: (v) => '₹' + fmt(v) } } }
+        }
+      });
+
+      // Render table
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b hover:bg-slate-50';
+        r.forEach((v, idx) => {
+          const td = document.createElement('td');
+          td.className = 'py-2';
+          td.textContent = idx === 0 ? v : (idx === 1 || idx === 2) ? fmt(v) : fmt(v);
+          if (idx !== 0) td.textContent = '₹' + td.textContent;
+          if (idx === 0) td.textContent = v;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      document.getElementById('rowCount').textContent = rows.length;
+
+      // Store for CSV download
+      window.__rows = rows;
+    }
+
+    // CSV download handler
+    function downloadCSV() {
+      const rows = window.__rows || [];
+      if (!rows.length) { alert('Please run the analysis first.'); return; }
+      const csv = toCSV(rows);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'buy_vs_rent_monthly.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('btnRun').addEventListener('click', run);
+    document.getElementById('btnCSV').addEventListener('click', downloadCSV);
+
+    // Auto-run once on load with defaults
+    window.addEventListener('DOMContentLoaded', run);
+  </script>
+</body>
+</html>
