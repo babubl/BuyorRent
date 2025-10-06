@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Buy vs Rent</title>
+  <title>Buy vs Rent — Pro v1</title>
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,133 +17,454 @@
       }
     }
   </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
-    body{ background:linear-gradient(180deg,#0b1020,#0f172a); color:#e5e7eb; }
-    .card{ border-radius:1rem; background:rgba(15,23,42,.72); padding:1.5rem; margin-bottom:1rem; }
-    .label{ font-size:.95rem; color:#e2e8f0; display:block; margin-top:.5rem; }
-    .input{ width:100%; border-radius:.75rem; border:1px solid rgba(148,163,184,.35); padding:.6rem; background:rgba(2,6,23,.65); color:#f8fafc; }
-    .btn{ padding:.6rem 1rem; border-radius:.75rem; font-weight:700; background:#f8fafc; color:#111; margin-right:.5rem; }
-    .kpi{ font-size:1.8rem; font-weight:800; }
-    .pill{ display:inline-block; padding:.3rem .8rem; border-radius:9999px; font-weight:700; background:#0ea5e9; color:#001018; }
-    .pill.win{ background:#22c55e; color:#00140a; }
-    details{ margin-top:1rem; }
-    details pre{ background:rgba(0,0,0,.3); padding:1rem; border-radius:.5rem; font-size:.85rem; white-space:pre-wrap; }
+    body{
+      background:
+        radial-gradient(1000px 700px at 20% 10%, #0ea5e9 10%, transparent 60%),
+        radial-gradient(1200px 800px at 80% 0%, #8b5cf6 10%, transparent 60%),
+        linear-gradient(180deg, #0b1020, #0b1020 30%, #0f172a 100%);
+      color:#e5e7eb;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+    .card{ border-radius: 1rem; background: rgba(15,23,42,.72); backdrop-filter: blur(6px); border:1px solid rgba(148,163,184,.18); box-shadow: 0 8px 30px rgba(2,6,23,.35); }
+    .label{ font-size:.95rem; color:#e2e8f0 }
+    .input, .select, input[type=range]{ width:100%; border-radius:.75rem; border:1px solid rgba(148,163,184,.35); padding:.65rem .85rem; outline:none; background: rgba(2,6,23,.65); color:#f8fafc }
+    .input:focus, .select:focus{ box-shadow:0 0 0 2px #6366f14d; border-color:#6366f1 }
+    .btn{ display:inline-flex; align-items:center; gap:.55rem; border-radius:.8rem; padding:.65rem 1rem; font-weight:700; background:#f8fafc; color:#0b1020 }
+    .pill{ display:inline-flex; align-items:center; gap:.5rem; border-radius:9999px; padding:.35rem .8rem; background:#0ea5e9; color:#001018; font-weight:800 }
+    .pill.win{ background:#22c55e; color:#00140a }
+    .kpi{ font-size: clamp(1.6rem, 3.2vw, 2.4rem); font-weight: 900; letter-spacing: -.01em; }
+    .muted{ color:#a7b0c0; font-size:.9rem }
+    .subtle{ color:#94a3b8; font-size:.9rem }
+    .bar-bg{ height:.75rem; border-radius:9999px; background:rgba(148,163,184,.25) }
+    .bar-fill{ height:100%; border-radius:9999px }
+    .chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.35rem .7rem; border-radius:9999px; background:#111827; border:1px solid rgba(148,163,184,.35); cursor:pointer; }
+    table{ width:100%; border-collapse: collapse; }
+    th, td{ padding:.5rem .6rem; border-bottom:1px solid rgba(148,163,184,.15); text-align:right; }
+    th:first-child, td:first-child{ text-align:left; }
+    details pre{ background:rgba(0,0,0,.3); padding:1rem; border-radius:.6rem; white-space:pre-wrap; }
   </style>
 </head>
-<body class="font-sans">
-  <div class="max-w-5xl mx-auto p-6">
-    <header class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl font-extrabold">Buy vs Rent</h1>
+<body class="min-h-screen font-sans">
+  <div class="max-w-7xl mx-auto p-6 md:p-10 space-y-8">
+
+    <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <button id="btnRun" class="btn">Run</button>
-        <button id="btnReset" class="btn">Reset</button>
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Buy vs Rent — Pro</h1>
+        <p class="subtle mt-1">Tidy inputs. Honest math. Clear outcome. Presets + sensitivity + break-even.</p>
+      </div>
+      <div class="flex gap-3 flex-wrap">
+        <button id="btnRun" class="btn" type="button">Run</button>
+        <button id="btnReset" class="btn" type="button">Reset</button>
       </div>
     </header>
 
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="card">
-        <h3 class="text-lg font-semibold">Property</h3>
-        <label class="label">Property Value (₹)</label>
-        <input id="propVal" class="input" type="number" value="15000000">
-        <label class="label">Down Payment (₹)</label>
-        <input id="downPayment" class="input" type="number" value="5000000">
-        <label class="label">Stamp Duty (%)</label>
-        <input id="stampRate" class="input" type="number" value="11">
-        <label class="label">Stay Duration (years)</label>
-        <input id="stayYears" class="input" type="number" value="10">
-        <label class="label">Property Appreciation (%)</label>
-        <input id="propApp" class="input" type="number" value="5">
-      </div>
-
-      <div class="card">
-        <h3 class="text-lg font-semibold">Loan</h3>
-        <label class="label">Loan Interest (%)</label>
-        <input id="loanRate" class="input" type="number" value="8">
-        <label class="label">Loan Tenure (years)</label>
-        <input id="loanTenure" class="input" type="number" value="20">
-      </div>
-
-      <div class="card">
-        <h3 class="text-lg font-semibold">Rent & Investments</h3>
-        <label class="label">Initial Rent (₹)</label>
-        <input id="rent0" class="input" type="number" value="40000">
-        <label class="label">Maintenance (₹/mo)</label>
-        <input id="maint0" class="input" type="number" value="5000">
-        <label class="label">Increase Interval (months)</label>
-        <input id="incInterval" class="input" type="number" value="24">
-        <label class="label">Increase per Step (%)</label>
-        <input id="incRate" class="input" type="number" value="10">
-        <label class="label">MF Return (%)</label>
-        <input id="mfRate" class="input" type="number" value="12">
-        <label class="flex items-center mt-2"><input id="includeStampInMF" type="checkbox" checked class="mr-2"> Invest Stamp Duty if renting</label>
+    <!-- Quick Presets -->
+    <section class="card p-4">
+      <div class="flex items-center gap-3 flex-wrap text-sm">
+        <span class="subtle">Presets:</span>
+        <button class="chip" data-preset="tier1">Tier‑1 City</button>
+        <button class="chip" data-preset="tier2">Tier‑2 City</button>
+        <button class="chip" data-preset="highrent">High‑rent Market</button>
       </div>
     </section>
 
-    <section class="card mt-6">
-      <div class="flex items-center justify-between">
+    <!-- Inputs -->
+    <section class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+      <!-- Property & Horizon -->
+      <div class="card p-6 space-y-4">
+        <h3 class="text-lg font-semibold">Property & Horizon</h3>
+        <label class="label">Property Value (₹)</label><input id="propVal" class="input" type="number" value="15000000">
+        <label class="label">Down Payment (₹)</label><input id="downPayment" class="input" type="number" value="5000000">
+        <label class="label">Stamp Duty + Registration (%)</label><input id="stampRate" class="input" type="number" value="11">
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="label">Stay Duration (years)</label><input id="stayYears" class="input" type="number" value="10"></div>
+          <div><label class="label">Property Appreciation (%/yr)</label><input id="propApp" class="input" type="number" value="5"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="label">Seller Brokerage at Exit (%)</label><input id="sellBrokerPct" class="input" type="number" value="2"></div>
+          <div><label class="label">Fit‑out / Furnishing (₹)</label><input id="fitOut" class="input" type="number" value="0"></div>
+        </div>
+      </div>
+
+      <!-- Loan -->
+      <div class="card p-6 space-y-4">
+        <h3 class="text-lg font-semibold">Loan</h3>
+        <label class="label">Home Loan Interest (%/yr)</label><input id="loanRate" class="input" type="number" value="8">
+        <label class="label">Loan Tenure (years)</label><input id="loanTenure" class="input" type="number" value="20">
+      </div>
+
+      <!-- Rent -->
+      <div class="card p-6 space-y-4">
+        <h3 class="text-lg font-semibold">Rent</h3>
+        <label class="label">Initial Monthly Rent (₹)</label><input id="rent0" class="input" type="number" value="40000">
+        <label class="label">Tenant Maintenance (₹/mo)</label><input id="tenantMaint0" class="input" type="number" value="2000">
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="label">Increase Interval (months)</label><input id="incInterval" class="input" type="number" value="24"></div>
+          <div><label class="label">Increase per Step (%)</label><input id="incRate" class="input" type="number" value="10"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="label">Security Deposit (months)</label><input id="depositMonths" class="input" type="number" value="2"></div>
+          <div><label class="label">Deposit Refund (%)</label><input id="depositRefundPct" class="input" type="number" value="100"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="label">Rent Brokerage (months)</label><input id="rentBrokerMonths" class="input" type="number" value="1"></div>
+          <div><label class="label">Relocation / Setup (₹)</label><input id="moveCost" class="input" type="number" value="0"></div>
+        </div>
+      </div>
+
+      <!-- Owner Costs & Investments -->
+      <div class="card p-6 space-y-4">
+        <h3 class="text-lg font-semibold">Owner Costs & Investments</h3>
+        <label class="label">Owner Maintenance (₹/mo)</label><input id="ownerMaint0" class="input" type="number" value="5000">
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="label">Maint Escalation (%/yr)</label><input id="maintEsc" class="input" type="number" value="5"></div>
+          <div><label class="label">MF Return (%/yr)</label><input id="mfRate" class="input" type="number" value="12"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="label">Property Tax (₹/yr)</label><input id="propTaxYear" class="input" type="number" value="10000"></div>
+          <div><label class="label">Home Insurance (₹/yr)</label><input id="homeInsYear" class="input" type="number" value="5000"></div>
+        </div>
+        <label class="flex items-center gap-2"><input id="includeStampInMF" type="checkbox" checked class="h-4 w-4"><span class="label">Invest avoided stamp duty if renting</span></label>
+      </div>
+    </section>
+
+    <!-- Taxes (simple toggles) -->
+    <section class="card p-6 space-y-4">
+      <h3 class="text-lg font-semibold">Taxes (Simple)</h3>
+      <label class="flex items-center gap-2"><input id="applyTax" type="checkbox" class="h-4 w-4"><span class="label">Apply HRA + Sec 24(b) + Sec 80C credits (approx)</span></label>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div><label class="label">HRA monthly savings (₹)</label><input id="hraSaving" class="input" type="number" value="0"></div>
+        <div><label class="label">Sec 24(b) cap (₹/yr)</label><input id="sec24Cap" class="input" type="number" value="200000"></div>
+        <div><label class="label">Sec 80C cap (₹/yr)</label><input id="sec80cCap" class="input" type="number" value="150000"></div>
+      </div>
+      <p class="subtle">Approximation: credits applied at year-end against owner cash outflow; HRA reduces effective rent monthly.</p>
+    </section>
+
+    <!-- Sensitivity -->
+    <section class="card p-6 space-y-3">
+      <h3 class="text-lg font-semibold">Sensitivity (Quick Sweep)</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="label">Property Appreciation %</label>
+          <input id="propAppSlider" type="range" min="0" max="10" value="5" step="0.5">
+          <div class="subtle">Current: <span id="propAppVal">5</span>%</div>
+        </div>
+        <div>
+          <label class="label">MF Return %</label>
+          <input id="mfRateSlider" type="range" min="6" max="15" value="12" step="0.5">
+          <div class="subtle">Current: <span id="mfRateVal">12</span>%</div>
+        </div>
+      </div>
+      <p class="subtle">These sliders adjust the inputs above and re-run instantly.</p>
+    </section>
+
+    <!-- Results -->
+    <section class="card p-6 space-y-4">
+      <div class="flex items-center justify-between flex-wrap gap-3">
         <h3 class="text-lg font-semibold">Results</h3>
         <span id="winnerBadge" class="pill">—</span>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <div><div class="sub">BUY</div><div id="kpiBuy" class="kpi">—</div><div id="buyNotes" class="text-sm">—</div></div>
-        <div><div class="sub">RENT</div><div id="kpiRent" class="kpi">—</div><div id="rentNotes" class="text-sm">—</div></div>
+
+      <div class="space-y-2">
+        <div class="bar-bg"><div id="deltaBar" class="bar-fill" style="width:0%"></div></div>
+        <div id="deltaText" class="muted">—</div>
+        <div class="muted">🕒 Break-even: <span id="breakEvenText">—</span></div>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <div>Total Rent+Maint: <span id="kpiRentTotal" class="font-bold">—</span></div>
-        <div>Total EMI+Maint: <span id="kpiBuyTotal" class="font-bold">—</span></div>
-        <div>Stamp Duty: <span id="kpiStamp" class="font-bold">—</span></div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="p-4 rounded-xl bg-black/30 border border-white/10">
+          <div class="subtle">BUY (Property FV − Loan Outstanding − Exit Brokerage)</div>
+          <div id="kpiBuy" class="kpi mt-1">—</div>
+          <div class="mt-2 text-sm" id="buyNotes">—</div>
+        </div>
+        <div class="p-4 rounded-xl bg-black/30 border border-white/10">
+          <div class="subtle">RENT (MF Value + Deposit Refund)</div>
+          <div id="kpiRent" class="kpi mt-1">—</div>
+          <div class="mt-2 text-sm" id="rentNotes">—</div>
+        </div>
       </div>
-      <details>
-        <summary class="cursor-pointer text-brand-500 font-semibold">Show calculations</summary>
-        <pre id="calcText">—</pre>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+        <div class="p-4 rounded-xl bg-black/20 border border-white/10"><div class="subtle">Total Rent + Maint (after HRA)</div><div id="kpiRentTotal" class="kpi mt-1">—</div></div>
+        <div class="p-4 rounded-xl bg-black/20 border border-white/10"><div class="subtle">Total EMI + Owner Maint + Tax/Ins (after credits)</div><div id="kpiBuyTotal" class="kpi mt-1">—</div></div>
+        <div class="p-4 rounded-xl bg-black/20 border border-white/10"><div class="subtle">Upfront Stamp Duty</div><div id="kpiStamp" class="kpi mt-1">—</div></div>
+      </div>
+
+      <!-- Expandable calculations + per-year summary -->
+      <details class="mt-6">
+        <summary class="cursor-pointer select-none text-brand-500 font-semibold">Show calculations & per‑year summary</summary>
+        <div class="mt-4 grid grid-cols-1 gap-6">
+          <pre id="calcText">—</pre>
+          <div class="overflow-x-auto">
+            <table id="yearTable" class="text-sm">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Buy: Equity (₹)</th>
+                  <th>Rent: MF Value (₹)</th>
+                  <th>Total Rent Paid (₹)</th>
+                  <th>Total EMI Paid (₹)</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
       </details>
     </section>
 
-    <footer class="text-center text-xs text-slate-300 mt-6">© Buy vs Rent • Planning only; not advice.</footer>
+    <footer class="text-center text-xs text-slate-300 pb-10">© Buy vs Rent • Planning only; not advice.</footer>
   </div>
 
   <script>
-    const $ = id => document.getElementById(id);
-    const fmt = n => (isNaN(n)?'—': new Intl.NumberFormat('en-IN').format(Math.round(n)) );
-    function pmt(r,n,pv){ if(r===0) return pv/n; const f=Math.pow(1+r,n); return (pv*r*f)/(f-1); }
-    function pvExcel(r,n,pmt,fv=0){ if(r===0) return -(fv+pmt*n); return -(pmt*(1-Math.pow(1+r,-n))/r + fv*Math.pow(1+r,-n)); }
-    function loanOutstanding(r,n,pmt,k){ return -pvExcel(r, n-k, pmt, 0); }
-    function seriesWithStep(initial, months, stepM, stepR){ let out=[]; for(let m=1;m<=months;m++){ let steps=Math.floor((m-1)/stepM); out.push(initial*Math.pow(1+stepR, steps)); } return out; }
+    // ---------- Helpers ----------
+    const $ = (id)=> document.getElementById(id);
+    const fmt = (n)=> (n==null||isNaN(n))? '—' : new Intl.NumberFormat('en-IN',{maximumFractionDigits:0}).format(Math.round(n));
+    const clamp = (v, lo, hi)=> Math.max(lo, Math.min(hi, v));
+    function pmt(r,n,pv){ if(r===0) return n? pv/n : 0; const f=Math.pow(1+r,n); return (pv*r*f)/(f-1); }
+    function pvExcel(r,n,pmtVal,fv=0){ if(r===0) return -(fv+pmtVal*n); return -( pmtVal*(1-Math.pow(1+r,-n))/r + fv*Math.pow(1+r,-n) ); }
+    function loanOutstanding(r,n,pmtVal,k){ const remain = Math.max(0, n-k); return -pvExcel(r, remain, pmtVal, 0); }
+    function seriesWithStep(initial, months, stepM, stepR){ const out=[]; const safeStepM = stepM>0 ? stepM : months+1; for(let m=1;m<=months;m++){ const steps=Math.floor((m-1)/safeStepM); out.push(initial*Math.pow(1+stepR, steps)); } return out; }
+    function seriesEscalating(initial, months, yearly){ const out=[]; const m = Math.pow(1+yearly/100,1/12)-1; let v=initial; for(let i=0;i<months;i++){ out.push(v); v = v*(1+m); } return out; }
 
-    function pullInputs(){ const gv=id=>+$(id).value||0; return {
-      propVal:gv('propVal'), downPayment:gv('downPayment'), stampRate:gv('stampRate')/100, stayYears:gv('stayYears'), propApp:gv('propApp')/100,
-      loanRateAnnual:gv('loanRate')/100, loanTenureYears:gv('loanTenure'),
-      rent0:gv('rent0'), maint0:gv('maint0'), incInterval:gv('incInterval'), incRate:gv('incRate')/100,
-      mfRateAnnual:gv('mfRate')/100, includeStampInMF:$('includeStampInMF').checked
-    };}
+    // ---------- Inputs ----------
+    function pullInputs(){
+      const gv=id=>+($(id).value||0);
+      return {
+        propVal:gv('propVal'), downPayment:gv('downPayment'), stampRate:gv('stampRate')/100,
+        stayYears:gv('stayYears'), propApp:gv('propApp')/100, sellBrokerPct:gv('sellBrokerPct')/100, fitOut:gv('fitOut'),
+        loanRateAnnual:gv('loanRate')/100, loanTenureYears:gv('loanTenure'),
+        rent0:gv('rent0'), tenantMaint0:gv('tenantMaint0'), incInterval:gv('incInterval'), incRate:gv('incRate')/100,
+        depositMonths:gv('depositMonths'), depositRefundPct:gv('depositRefundPct')/100, rentBrokerMonths:gv('rentBrokerMonths'), moveCost:gv('moveCost'),
+        ownerMaint0:gv('ownerMaint0'), maintEsc:gv('maintEsc'), mfRateAnnual:gv('mfRate')/100,
+        propTaxYear:gv('propTaxYear'), homeInsYear:gv('homeInsYear'),
+        includeStampInMF:$('includeStampInMF').checked,
+        applyTax:$('applyTax').checked, hraSaving:gv('hraSaving'), sec24Cap:gv('sec24Cap'), sec80cCap:gv('sec80cCap')
+      };
+    }
 
+    // ---------- Core compute ----------
     function computeScenario(inp){
-      const months=inp.stayYears*12, rM=inp.loanRateAnnual/12, mfM=Math.pow(1+inp.mfRateAnnual,1/12)-1;
-      const loanAmt=Math.max(0,inp.propVal-inp.downPayment), nTotal=inp.loanTenureYears*12;
-      const emi=loanAmt>0? pmt(rM,nTotal,loanAmt):0, stampAmt=inp.propVal*inp.stampRate;
-      const rents=seriesWithStep(inp.rent0,months,inp.incInterval,inp.incRate);
-      const maints=seriesWithStep(inp.maint0,months,inp.incInterval,inp.incRate);
-      let mf=inp.downPayment+(inp.includeStampInMF? stampAmt:0), totalRent=0,totalOwn=0;
-      for(let i=0;i<months;i++){ let rent=rents[i],maint=maints[i]; totalRent+=rent+maint; totalOwn+=emi+maint; let surplus=Math.max(emi+maint-(rent+maint),0); mf=mf*(1+mfM)+surplus; }
-      const fv=inp.propVal*Math.pow(1+inp.propApp,inp.stayYears), outEnd=loanOutstanding(rM,nTotal,emi,Math.min(months,nTotal));
-      return {endBuy:fv-outEnd,endRent:mf,totalRent,totalOwn,stampAmt,emi,loanAmt,fv,outEnd}; }
+      const months = Math.round(inp.stayYears*12);
+      const rM = inp.loanRateAnnual/12;
+      const rAppM = Math.pow(1+inp.propApp,1/12)-1;
+      const mfM = Math.pow(1+inp.mfRateAnnual,1/12)-1;
 
-    function render(a,inp){
-      $('kpiBuy').textContent='₹'+fmt(a.endBuy); $('kpiRent').textContent='₹'+fmt(a.endRent);
-      $('kpiRentTotal').textContent='₹'+fmt(a.totalRent); $('kpiBuyTotal').textContent='₹'+fmt(a.totalOwn); $('kpiStamp').textContent='₹'+fmt(a.stampAmt);
-      $('buyNotes').textContent=`Loan ₹${fmt(a.loanAmt)} | EMI ₹${fmt(a.emi)}/mo`; $('rentNotes').textContent=`Corpus starts ₹${fmt(inp.downPayment+(inp.includeStampInMF?a.stampAmt:0))}`;
-      const win=a.endBuy>a.endRent?'BUY':'RENT'; $('winnerBadge').textContent='Winner: '+win; $('winnerBadge').className='pill '+(win==='BUY'?'win':'');
-      let lines=[]; lines.push(`Loan amount: ₹${fmt(a.loanAmt)}; EMI: ₹${fmt(a.emi)}`); lines.push(`Property FV: ₹${fmt(a.fv)}; Outstanding: ₹${fmt(a.outEnd)}`);
-      lines.push(`Stamp Duty: ₹${fmt(a.stampAmt)}`); lines.push(`Totals → Rent: ₹${fmt(a.totalRent)}, Buy: ₹${fmt(a.totalOwn)}`); lines.push(`Results → Buy: ₹${fmt(a.endBuy)}, Rent: ₹${fmt(a.endRent)}`);
-      $('calcText').textContent=lines.join('\n'); }
+      const loanAmt = Math.max(0, inp.propVal - inp.downPayment);
+      const nTotal = Math.floor(inp.loanTenureYears*12);
+      const emi = loanAmt>0 ? pmt(rM, nTotal, loanAmt) : 0;
+      const stampAmt = inp.propVal*inp.stampRate;
 
-    function run(){ const inp=pullInputs(); const a=computeScenario(inp); render(a,inp); }
-    function reset(){ ['propVal','downPayment','stampRate','stayYears','propApp','loanRate','loanTenure','rent0','maint0','incInterval','incRate','mfRate'].forEach(id=>{ $(id).value=$(id).defaultValue; }); $('includeStampInMF').checked=true; run(); }
-    window.onload=()=>{ $('btnRun').onclick=run; $('btnReset').onclick=reset; run(); };
+      // Rent & maint series
+      const rentSeries = seriesWithStep(inp.rent0, months, inp.incInterval, inp.incRate);
+      const tenantMaintSeries = seriesWithStep(inp.tenantMaint0, months, inp.incInterval, inp.incRate);
+      const ownerMaintSeries = seriesEscalating(inp.ownerMaint0, months, inp.maintEsc);
+
+      // Upfronts for rent path
+      const deposit = inp.rent0 * inp.depositMonths;
+      const brokerage = inp.rent0 * inp.rentBrokerMonths;
+      const depositRefund = deposit * clamp(inp.depositRefundPct,0,1);
+
+      // Rent path starting corpus
+      let mf = inp.downPayment + (inp.includeStampInMF? stampAmt: 0) - deposit - brokerage - inp.moveCost;
+      if(mf<0) mf=0;
+
+      let totalRentEff=0, totalOwn=0;
+      let yInt=0, yPrin=0;
+      const perYear = [];
+      const tol = 50000;
+      let beMonth = null, prevDiff=null;
+
+      for(let i=0;i<months;i++){
+        const rent = rentSeries[i]||0;
+        const tMaint = tenantMaintSeries[i]||0;
+        const rentEff = Math.max(0, rent + tMaint - (inp.applyTax ? inp.hraSaving : 0));
+
+        const oMaint = ownerMaintSeries[i]||0;
+        const extras = (inp.propTaxYear + inp.homeInsYear)/12;
+        const ownMaintTaxIns = oMaint + extras;
+
+        const outPrev = loanOutstanding(rM, nTotal, emi, i);
+        const interest = outPrev*rM;
+        const principal = Math.max(0, emi - interest);
+        yInt += interest; yPrin += principal;
+
+        // year-end tax credits (approx applied monthly after year end by pro-rating)
+        let credit = 0;
+        if(inp.applyTax && ((i+1)%12===0)){
+          const allowI = Math.min(inp.sec24Cap, yInt);
+          const allowP = Math.min(inp.sec80cCap, yPrin);
+          credit = (allowI + allowP)/12; // spread as avg monthly reduction
+          yInt=0; yPrin=0;
+        }
+
+        const ownTotal = emi + ownMaintTaxIns - (inp.applyTax ? credit : 0);
+        const surplus = Math.max(ownTotal - rentEff, 0);
+        mf = mf*(1+mfM) + surplus;
+
+        totalRentEff += rentEff;
+        totalOwn += ownTotal;
+
+        // wealth this month
+        const outNow = loanOutstanding(rM, nTotal, emi, i+1);
+        const fvNow = inp.propVal*Math.pow(1+rAppM, i+1);
+        const buyWealthNow = fvNow - outNow;
+        const rentWealthNow = mf;
+        const diff = buyWealthNow - rentWealthNow;
+
+        if(beMonth===null){
+          if(Math.abs(diff)<=tol){ beMonth=i+1; }
+          else if(prevDiff!==null && (prevDiff>0)!==(diff>0)){
+            const f = Math.abs(prevDiff)/(Math.abs(prevDiff)+Math.abs(diff));
+            beMonth = i + f;
+          }
+        }
+        prevDiff = diff;
+
+        // capture year rows
+        if((i+1)%12===0){
+          const yr=(i+1)/12;
+          perYear.push({
+            year: yr,
+            buyEq: buyWealthNow,
+            mfVal: rentWealthNow,
+            rentPaid: totalRentEff,
+            emiPaid: totalOwn
+          });
+        }
+      }
+
+      const fvEnd = inp.propVal*Math.pow(1+inp.propApp, inp.stayYears);
+      const outEnd = loanOutstanding(rM, nTotal, emi, Math.min(months, nTotal));
+      const exitBroker = fvEnd * clamp(inp.sellBrokerPct,0,1);
+      const endBuy = fvEnd - outEnd - exitBroker - inp.fitOut;
+      const endRent = mf + depositRefund;
+
+      return { endBuy, endRent, totalRentEff, totalOwn, stampAmt, emi, loanAmt, beMonth, perYear, exitBroker, depositRefund };
+    }
+
+    // ---------- Render ----------
+    function render(a, inp){
+      const k=(id,v)=>($(id).textContent = v);
+
+      k('kpiBuy','₹'+fmt(a.endBuy));
+      k('kpiRent','₹'+fmt(a.endRent));
+      k('kpiRentTotal','₹'+fmt(a.totalRentEff));
+      k('kpiBuyTotal','₹'+fmt(a.totalOwn));
+      k('kpiStamp','₹'+fmt(a.stampAmt));
+
+      const win = a.endBuy>a.endRent ? 'BUY' : (a.endRent>a.endBuy ? 'RENT' : 'TIE');
+      const badge = $('winnerBadge');
+      badge.textContent = 'Winner: '+win;
+      badge.className = 'pill '+(win==='BUY'?'win':'');
+
+      const deltaAbs = Math.abs(a.endBuy - a.endRent);
+      const deltaPct = (deltaAbs / Math.max(a.endBuy, a.endRent) || 0) * 100;
+      const bar = $('deltaBar');
+      bar.style.width = Math.max(0, Math.min(100, deltaPct)).toFixed(1)+'%';
+      bar.style.background = (win==='BUY')? '#22c55e' : '#0ea5e9';
+      k('deltaText', (win==='TIE') ? 'Both paths are equal under current inputs.' : `${win} ahead by ₹${fmt(deltaAbs)} (~${deltaPct.toFixed(1)}% of the larger outcome)`);
+
+      if(a.beMonth && isFinite(a.beMonth)){
+        const y = a.beMonth/12;
+        const yInt = Math.floor(a.beMonth/12);
+        const mRem = Math.round(a.beMonth - yInt*12);
+        k('breakEvenText', `${y.toFixed(1)} years (${yInt}y ${mRem}m)`);
+      } else {
+        k('breakEvenText','Not within your horizon');
+      }
+
+      $('buyNotes').textContent = `Loan ₹${fmt(a.loanAmt)} | EMI ₹${fmt(a.emi)} / mo | Exit brokerage ₹${fmt(a.exitBroker)}`;
+      $('rentNotes').textContent = `Starts with corpus = Down Payment + ${inp.includeStampInMF?'Stamp':''} − deposit/brokerage/setup; Deposit refund at exit ₹${fmt(a.depositRefund)}`;
+
+      // per-year table
+      const tbody = document.querySelector('#yearTable tbody');
+      tbody.innerHTML = '';
+      a.perYear.forEach(row=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML = `<td>${row.year}</td><td>₹${fmt(row.buyEq)}</td><td>₹${fmt(row.mfVal)}</td><td>₹${fmt(row.rentPaid)}</td><td>₹${fmt(row.emiPaid)}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      // calc text summary
+      const lines = [];
+      lines.push(`Loan amount = max(Property − Down Payment, 0) = ₹${fmt(inp.propVal)} − ₹${fmt(inp.downPayment)} = ₹${fmt(a.loanAmt)}`);
+      lines.push(`EMI = P·r·(1+r)^n / [(1+r)^n − 1]; P=₹${fmt(a.loanAmt)}, r=${(inp.loanRateAnnual*100/12).toFixed(3)}%/mo, n=${Math.floor(inp.loanTenureYears*12)}`);
+      lines.push(`Property FV (end) = ₹${fmt(inp.propVal)} · (1+${(inp.propApp*100).toFixed(2)}%)^${inp.stayYears} = ₹${fmt(inp.propVal*Math.pow(1+inp.propApp, inp.stayYears))}`);
+      lines.push(`Owner costs = Maint (esc ${inp.maintEsc}%/yr) + Tax ₹${fmt(inp.propTaxYear)}/yr + Ins ₹${fmt(inp.homeInsYear)}/yr`);
+      lines.push(`Rent path upfront = deposit ₹${fmt(inp.rent0*inp.depositMonths)}, brokerage ₹${fmt(inp.rent0*inp.rentBrokerMonths)}, setup ₹${fmt(inp.moveCost)}`);
+      if(inp.applyTax){
+        lines.push(`Tax credits (approx): HRA ₹${fmt(inp.hraSaving)}/mo; Sec24 cap ₹${fmt(inp.sec24Cap)}/yr; Sec80C cap ₹${fmt(inp.sec80cCap)}/yr`);
+      }
+      lines.push(`Exit: Brokerage ${ (inp.sellBrokerPct*100).toFixed(1)}% = ₹${fmt(a.exitBroker)}; Fit‑out deducted ₹${fmt(inp.fitOut)}`);
+      lines.push(`Ending wealth → Buy: ₹${fmt(a.endBuy)} ; Rent: ₹${fmt(a.endRent)}`);
+      $('calcText').textContent = lines.join('\n');
+    }
+
+    // ---------- Controllers ----------
+    function run(){ const inp=pullInputs(); const res=computeScenario(inp); render(res, inp); }
+    function reset(){
+      const defaults = {
+        propVal:15000000, downPayment:5000000, stampRate:11, stayYears:10, propApp:5, sellBrokerPct:2, fitOut:0,
+        loanRate:8, loanTenure:20,
+        rent0:40000, tenantMaint0:2000, incInterval:24, incRate:10, depositMonths:2, depositRefundPct:100, rentBrokerMonths:1, moveCost:0,
+        ownerMaint0:5000, maintEsc:5, mfRate:12, propTaxYear:10000, homeInsYear:5000,
+        hraSaving:0, sec24Cap:200000, sec80cCap:150000
+      };
+      for(const [k,v] of Object.entries(defaults)){
+        const el=$(k); if(!el) continue;
+        if(el.type==='checkbox'){ el.checked = !!v; } else { el.value = v; }
+      }
+      $('includeStampInMF').checked = true;
+      $('applyTax').checked = false;
+      $('propAppSlider').value = 5; $('propAppVal').textContent = '5';
+      $('mfRateSlider').value = 12; $('mfRateVal').textContent = '12';
+      run();
+    }
+
+    // Sensitivity sliders sync
+    function hookSensitivity(){
+      $('propAppSlider').addEventListener('input', e=>{ $('propApp').value = e.target.value; $('propAppVal').textContent = e.target.value; run(); });
+      $('mfRateSlider').addEventListener('input', e=>{ $('mfRate').value = e.target.value; $('mfRateVal').textContent = e.target.value; run(); });
+    }
+
+    // Presets
+    function applyPreset(name){
+      if(name==='tier1'){
+        $('rent0').value=60000; $('incRate').value=10; $('incInterval').value=11;
+        $('stampRate').value=7; $('propApp').value=5; $('mfRate').value=12;
+      } else if(name==='tier2'){
+        $('rent0').value=30000; $('incRate').value=8; $('incInterval').value=24;
+        $('stampRate').value=6; $('propApp').value=4; $('mfRate').value=11;
+      } else if(name==='highrent'){
+        $('rent0').value=80000; $('incRate').value=10; $('incInterval').value=12;
+        $('stampRate').value=8; $('propApp').value=5; $('mfRate').value=12;
+      }
+      $('propAppSlider').value = $('propApp').value; $('propAppVal').textContent = $('propApp').value;
+      $('mfRateSlider').value = $('mfRate').value; $('mfRateVal').textContent = $('mfRate').value;
+      run();
+    }
+
+    function hookPresets(){
+      document.querySelectorAll('.chip[data-preset]').forEach(btn=>{
+        btn.addEventListener('click', ()=> applyPreset(btn.dataset.preset));
+      });
+    }
+
+    // Boot
+    window.addEventListener('DOMContentLoaded', ()=>{
+      hookSensitivity();
+      hookPresets();
+      $('btnRun').onclick=run;
+      $('btnReset').onclick=reset;
+      reset(); // sets defaults and runs once
+    });
   </script>
 </body>
 </html>
